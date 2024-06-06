@@ -44,8 +44,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        _cpusched: [bore, eevdf, pds, bmq]
-        os: [arch, ubuntu, fedora]
+        _cpusched: [bore]
+        os: [arch]
     uses: ./.github/workflows/builder-dispatcher.yml
     with:
       _cpusched: ${{ matrix._cpusched }}
@@ -78,5 +78,3 @@ jobs:
           title: "[experimental] ${{ needs.check-for-newer-kernel.outputs.latest_kernel }}"
           files: |
             ${{ github.workspace }}/arch-kernel-packages-*/**
-            ${{ github.workspace }}/ubuntu-kernel-packages-*/**
-            ${{ github.workspace }}/fedora-kernel-packages-*/**
