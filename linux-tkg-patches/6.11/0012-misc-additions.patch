@@ -98,6 +98,19 @@ index f4b210ab061291..837d0dbb28ea08 100644
  	help
  	  This value can be used to select the number of bits to use to
 
+diff --git a/drivers/gpu/drm/amd/display/dc/core/dc_state.c b/drivers/gpu/drm/amd/display/dc/core/dc_state.c
+index 180ac47868c2..42bf097b36b7 100644
+--- a/drivers/gpu/drm/amd/display/dc/core/dc_state.c
++++ b/drivers/gpu/drm/amd/display/dc/core/dc_state.c
+@@ -300,7 +300,6 @@ void dc_state_destruct(struct dc_state *state)
+ 	state->phantom_plane_count = 0;
+ 
+ 	state->stream_mask = 0;
+-	memset(&state->res_ctx, 0, sizeof(state->res_ctx));
+ 	memset(&state->pp_display_cfg, 0, sizeof(state->pp_display_cfg));
+ 	memset(&state->dcn_bw_vars, 0, sizeof(state->dcn_bw_vars));
+ 	state->clk_mgr = NULL;
+
 From 299b81f3e619aea3ceda77d7c42842a496b34a53 Mon Sep 17 00:00:00 2001
 From: Peter Jung <admin@ptr1337.dev>
 Date: Thu, 21 Mar 2024 19:00:50 +0100
@@ -135,7 +148,7 @@ index 59d2eee72a3297..0a4e75de95c257 100644
 @@ -4078,7 +4078,7 @@ static int amdgpu_dm_mode_config_init(struct amdgpu_device *adev)
  		return r;
  	}
-
+ 
 -#ifdef AMD_PRIVATE_COLOR
 +#ifdef CONFIG_AMD_PRIVATE_COLOR
  	if (amdgpu_dm_create_color_properties(adev)) {
@@ -235,6 +248,6 @@ index a54663f2e2ab9f..7ffad3eb0a0150 100644
  			switch (amdgpu_ip_version(adev, MP1_HWIP, 0)) {
  			case IP_VERSION(13, 0, 2):
 -			case IP_VERSION(13, 0, 6):
+ 			case IP_VERSION(13, 0, 14):
  			case IP_VERSION(11, 0, 7):
  			case IP_VERSION(11, 0, 11):
- 			case IP_VERSION(11, 0, 12):

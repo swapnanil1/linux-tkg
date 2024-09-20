@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of kernels that are maintained upstream
-_current_kernels=("6.10" "6.9" "6.8" "6.7" "6.6" "6.5" "6.4" "6.1" "5.15")
+_current_kernels=("6.11" "6.10" "6.9" "6.8" "6.7" "6.6" "6.5" "6.4" "6.1" "5.15")
 
 # List of kernels that are no longer maintained either upstream or locally
 _eol_kernels=("6.3" "6.2" "6.0" "5.19" "5.18" "5.17" "5.16" "5.14" "5.13" "5.12" "5.11" "5.9" "5.8" "5.7" "5.4.230" "5.10.135")
@@ -45,21 +45,22 @@ typeset -Ag _rt_subver_map
 _rt_subver_map=(
   ["5.4"]="271"
   ["5.9"]="1"
-  ["5.10"]="216"
+  ["5.10"]="221"
   ["5.11"]="4"
   ["5.14"]="2"
-  ["5.15"]="158"
+  ["5.15"]="160"
   ["5.16"]="2"
   ["5.17"]="1"
   ["6.0"]="5"
-  ["6.1"]="90"
+  ["6.1"]="99"
   ["6.3"]="3"
   ["6.4"]="6"
   ["6.5"]="2"
-  ["6.6"]="30"
+  ["6.6"]="41"
   ["6.7"]="0"
   ["6.8"]="2"
   ["6.9"]="0"
+  ["6.10"]="rc6"
 )
 
 # PREEMPT_RT's patch revision for the kernel
@@ -68,21 +69,22 @@ typeset -Ag _rt_rev_map
 _rt_rev_map=(
   ["5.4"]="89"
   ["5.9"]="20"
-  ["5.10"]="108"
+  ["5.10"]="113"
   ["5.11"]="11"
   ["5.14"]="21"
-  ["5.15"]="76"
+  ["5.15"]="77"
   ["5.16"]="19"
   ["5.17"]="17"
   ["6.0"]="14"
-  ["6.1"]="30"
+  ["6.1"]="36"
   ["6.3"]="15"
   ["6.4"]="8"
   ["6.5"]="8"
-  ["6.6"]="30"
+  ["6.6"]="37"
   ["6.7"]="6"
   ["6.8"]="11"
   ["6.9"]="5"
+  ["6.10"]="11"
 )
 
 _undefine() {
@@ -331,6 +333,10 @@ _set_cpu_scheduler() {
   elif [ "$_kver" = "608" ]; then
     _avail_cpu_scheds=("eevdf" "bore" "echo" "pds" "bmq")
   elif [ "$_kver" = "609" ]; then
+    _avail_cpu_scheds=("eevdf" "bore" "pds" "bmq")
+  elif [ "$_kver" = "610" ]; then
+    _avail_cpu_scheds=("eevdf" "bore" "pds" "bmq")
+  elif [ "$_kver" = "611" ]; then
     _avail_cpu_scheds=("eevdf" "bore" "pds" "bmq")
   else
     _avail_cpu_scheds=("$_default_cpu_sched")
@@ -676,26 +682,29 @@ _tkg_srcprep() {
   _patch_location="$srcdir"
 
   if [ "$_kver" = "504" ]; then
-    _patch_name="more-uarches-for-kernel-4.19-5.4"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-4.19-5.4"
   elif [ "$_kver" = "507" ]; then
     _outdated="outdated_versions/"
-    _patch_name="enable_additional_cpu_optimizations_for_gcc_v10.1%2B_kernel_v5.7"
+    _patch_name="enable_additional_cpu_optimizations_for_gcc_v10.1+_kernel_v5.7"
   elif (( 508 <= "$_kver" &&  "$_kver" <= 514 )); then
-    _patch_name="more-uarches-for-kernel-5.8-5.14"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-5.8-5.14"
   elif [[ "$_kver" =~ ^(515|516)$ ]]; then
-    _patch_name="more-uarches-for-kernel-5.15-5.16"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-5.15-5.16"
   elif ( [ "$_kver" = "601" ] && [ "$_sub" -lt "79" ] ) || ( [ "$_kver" = "606" ] && [ "$_sub" -lt "18" ] ) || ( [ "$_kver" = "607" ] && [ "$_sub" -lt "6" ] ) || [[ "$_kver" =~ ^(517|518|519|600|602|603|604|605)$ ]]; then
-    _patch_name="more-uarches-for-kernel-5.17-6.1.78"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-5.17-6.1.78"
   elif [[ "$_kver" =~ ^(601|606|607)$ ]]; then
-    _patch_name="more-uarches-for-kernel-6.1.79-6.8-rc3"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-6.1.79-6.8-rc3"
   else
-    _patch_name="more-uarches-for-kernel-6.8-rc4%2B"
+    _patch_name="more-ISA-levels-and-uarches-for-kernel-6.8-rc4+"
   fi
 
   curl "https://raw.githubusercontent.com/graysky2/kernel_compiler_patch/master/${_outdated}${_patch_name}.patch" > "$srcdir"/"${_patch_name}".patch || true
   tkgpatch="${_patch_location}/${_patch_name}.patch"
   if [ -e "$tkgpatch" ]; then
     _msg="Applying graysky's cpu opts patch" && _tkg_patcher
+    if grep -wq "MINTEL_CPU_V3" "$tkgpatch"; then
+      _graysky_legacy="false"
+    fi
   else
     msg2 "Couldn't find graysky's cpu opts patch for this version"
   fi
@@ -780,7 +789,7 @@ _tkg_srcprep() {
     rev=5
   elif [ "$_kver" = "512" ] || [ "$_kver" = "515" ] || [ "$_kver" = "516" ] || [ "$_kver" = "601" ] || [ "$_kver" = "603" ] || [ "$_kver" = "608" ]; then
     rev=1
-  elif [ "$_kver" = "518" ] || [ "$_kver" = "602" ] || [ "$_kver" = "607" ]; then
+  elif [ "$_kver" = "518" ] || [ "$_kver" = "602" ] || [ "$_kver" = "607" ] || [ "$_kver" = "610" ]; then
     rev=2
   else
     rev=0
@@ -967,6 +976,7 @@ _tkg_srcprep() {
 
   # buggy project C/PSI interaction workaround
   if [ "${_cpusched}" = "pds" ] || [ "${_cpusched}" = "bmq" ]; then
+    _disable "PSI"
     _enable "PSI_DEFAULT_DISABLED"
     # Disable MLX5_CORE on Prjc
     plain "Disable MLX5_CORE for Prjc"
@@ -1041,7 +1051,13 @@ _tkg_srcprep() {
   fi
 
   # cpu opt
-  _cpu_marchs=("native_amd" "native_intel" "generic_cpu" "generic_cpu2" "generic_cpu3" "generic_cpu4")
+  _cpu_marchs=("generic_cpu")
+  if [ "$_graysky_legacy" = "false" ]; then
+    _cpu_marchs+=("amd_cpu_v2" "amd_cpu_v3" "intel_cpu_v2" "intel_cpu_v3")
+  else
+    _cpu_marchs+=("generic_cpu2" "generic_cpu3" "generic_cpu4")
+  fi
+  _cpu_marchs+=("native_amd" "native_intel")
   _cpu_marchs+=("k8" "k8sse3" "k10" "barcelona" "bobcat" "jaguar" "bulldozer" "piledriver")
   _cpu_marchs+=("steamroller" "excavator" "zen" "zen2" "zen3" "zen4" "mpsc" "atom" "core2" "nehalem" "westmere")
   _cpu_marchs+=("bonnell" "silvermont" "sandybridge" "ivybridge" "haswell" "broadwell" "skylake")
@@ -1068,7 +1084,7 @@ _tkg_srcprep() {
 
   if [ -z "$_processor_opt" ]; then
     msg2 "Please select the desired CPU micro-architecture"
-    _default_index="2"
+    _default_index="0"
     _prompt_from_array "${_cpu_marchs[@]}"
     _processor_opt="${_selected_value}"
   fi
@@ -1687,18 +1703,20 @@ CONFIG_DEBUG_INFO_BTF_MODULES=y\r
   unset _msg
 
   # Waydroid
-  if [ -z "$_waydroid" ]; then
-    plain ""
-    plain "Enable android modules for use with Waydroid?"
-    plain "https://waydro.id"
-    read -rp "`echo $'    > N/y : '`" CONDITION12;
-  fi
-  if [[ "$CONDITION12" =~ [yY] ]] || [ "$_waydroid" = "true" ]; then
-    _enable "ANDROID" "ANDROID_BINDER_IPC" "ANDROID_BINDERFS"
-    _disable "ANDROID_BINDER_IPC_SELFTEST"
-    scripts/config --set-str "ANDROID_BINDER_DEVICES" ""
-    if [[ "$CONDITION12" =~ [yY] ]]; then
-      read -rp "Press enter to continue..."
+  if [ "${_cpusched}" != "pds" ] && [ "${_cpusched}" != "bmq" ]; then
+    if [ -z "$_waydroid" ]; then
+      plain ""
+      plain "Enable android modules for use with Waydroid?"
+      plain "https://waydro.id"
+      read -rp "`echo $'    > N/y : '`" CONDITION12;
+    fi
+    if [[ "$CONDITION12" =~ [yY] ]] || [ "$_waydroid" = "true" ]; then
+      _enable "ANDROID" "ANDROID_BINDER_IPC" "ANDROID_BINDERFS"
+      _disable "ANDROID_BINDER_IPC_SELFTEST"
+      scripts/config --set-str "ANDROID_BINDER_DEVICES" ""
+      if [[ "$CONDITION12" =~ [yY] ]]; then
+        read -rp "Press enter to continue..."
+      fi
     fi
   fi
 

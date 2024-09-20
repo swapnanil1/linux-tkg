@@ -11,14 +11,14 @@ diff --git a/Makefile b/Makefile
  KBUILD_USERLDFLAGS := $(USERLDFLAGS)
 
 @@ -474,7 +474,7 @@ endif
- 			    -Wclippy::dbg_macro
-
- KBUILD_HOSTCFLAGS   := $(KBUILD_USERHOSTCFLAGS) $(HOST_LFS_CFLAGS) $(HOSTCFLAGS)
--KBUILD_HOSTCXXFLAGS := -Wall -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS)
-+KBUILD_HOSTCXXFLAGS := -Wall -O3 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS)
+ 
+ KBUILD_HOSTCFLAGS   := $(KBUILD_USERHOSTCFLAGS) $(HOST_LFS_CFLAGS) \
+ 		       $(HOSTCFLAGS) -I $(srctree)/scripts/include
+-KBUILD_HOSTCXXFLAGS := -Wall -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) \
++KBUILD_HOSTCXXFLAGS := -Wall -O3 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) \
+ 		       -I $(srctree)/scripts/include
  KBUILD_HOSTRUSTFLAGS := $(rust_common_flags) -O -Cstrip=debuginfo \
  			-Zallow-features= $(HOSTRUSTFLAGS)
- KBUILD_HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS) $(HOSTLDFLAGS)
 @@ -757,7 +757,7 @@ KBUILD_CFLAGS       += $(call cc-disable-warning, format-overflow)
  KBUILD_CFLAGS  += $(call cc-disable-warning, address-of-packed-member)
 
